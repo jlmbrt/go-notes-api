@@ -29,20 +29,20 @@ If you use `run` script, `.env` file present in project root directory is automa
 # Start
 
 ```bash
-go run main.go		# basic execution
-./run start			# with the help of the run script
-./run docker start	# execution inside container
+go run main.go # basic execution
+./run start # with the help of the run script
+./run docker start # execution inside container
 ```
 
 # Build
 
 ```Bash
-go build				# basic execution
+go build # basic execution
 # or
 go build -o build/
 
-./run build			# with the help of the run script
-./run docker build 	# execution inside container
+./run build # with the help of the run script
+./run docker build # execution inside container
 ```
 
 ## Bonus, run in watch mode
