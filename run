@@ -5,7 +5,7 @@ if [ -f .env ]; then
   export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
 fi
 
-# Set default PORT and PORJECT name if not set
+# Set default PORT and PROJECT name if not set
 PORT=${PORT:-8080}
 PROJECT=${PROJECT:-poc}
 
@@ -27,7 +27,7 @@ dev(){
 
 # Build qapp
 build(){
-  go build -o build/ 
+  go build -o build/
 }
 
 # Start app
