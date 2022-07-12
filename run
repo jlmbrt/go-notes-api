@@ -1,0 +1,87 @@
+#! /bin/sh
+
+# Source .env file
+if [ -f .env ]; then
+  export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
+fi
+
+# Set default PORT and PORJECT name if not set
+PORT=${PORT:-8080}
+PROJECT=${PROJECT:-poc}
+
+# Run app in watch mode using air (https://github.com/cosmtrek/air)
+dev(){
+  echo "Start app in watch mode with air"
+  command -v air
+  if [ $? -ne 0 ]; then 
+    echo "!!! !!! !!!"
+    echo "    Air is not installed, please install it before" 
+    echo "    execute go install github.com/cosmtrek/air@latest"
+    echo "    alternatively you can use ./run docker dev"
+    echo "!!! !!! !!!"
+    exit 1
+  fi
+
+  air main.go
+}
+
+# Build qapp
+build(){
+  go build -o build/ 
+}
+
+# Start app
+start(){
+  go run main.go
+}
+
+
+run_docker(){
+  command -v docker
+  if [ $? -ne 0 ]; then 
+    echo "!!! !!! !!!"
+    echo "    Docker is not installed, please install it before" 
+    echo "!!! !!! !!!"
+    exit 1
+  fi
+
+  case $1 in
+    dev) docker_dev ;;
+    build) docker_build ;;
+    start) docker_start ;;
+    stop) docker stop $PROJECT ;;
+    *) echo 'command not found'; exit 1 ;;
+  esac
+}
+
+# Run app in watch inside a container
+docker_dev(){
+  echo "Start app in watch mode with docker"
+  docker run --rm -p $PORT:$PORT -e PORT=$PORT -w /app -v $(pwd):/app cosmtrek/air
+}
+
+# Build app inside a container
+docker_build(){
+  echo "Build app with docker"
+  docker run --rm -w /app -v $(pwd):/app golang:1.18 go build -o build/
+}
+
+# Run app inside a container
+docker_start(){
+  echo "Start app with docker"
+  docker run --rm -d -p $PORT:$PORT -e PORT=$PORT --name $PROJECT -w /app -v $(pwd):/app golang:1.18 go run main.go
+  echo "use ./run docker stop for remove the container"
+}
+
+# tmp folder for air
+mkdir -p tmp
+# build folder
+mkdir -p build
+
+case $1 in 
+  dev) dev ;;
+  build) build ;;
+  start) start ;;
+  docker) shift; run_docker $@ ;;
+  *) echo 'command not found'; exit 1 ;;
+esac
